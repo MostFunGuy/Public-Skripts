@@ -1,0 +1,116 @@
+﻿# #! E 
+# #! This is MostFunGuy's searchable enum function. Enjoy! :D
+# #! 
+
+options:
+  pre:<gold>[<Yellow>Enums<gold>] <Yellow>
+  prebad:<Red>[<pink>Enums<Red>] <Yellow>
+
+on script load:
+  clear {enums.list::*}
+  add sound, particles, biomes, colors and trees to {enums.list::*}  # #! Took out fireworktype for now, was giving me grief
+
+command /search [<type>] [<text>]:
+  aliases:/types
+  usage:/search <type> (sound/particle/firework/biomes/colors/trees)
+  trigger:
+    if "%arg 1%" is "<none>":
+      send json "{@pre}Click a <gold>type <yellow>to search:" tooltip "<light aqua>vvv <dark aqua>Click one below to search! <light aqua>vvv" to player
+      
+      loop {enums.list::*}:
+        set {_type} to "%loop-value%"
+        replace all "types." with "" in {_type}
+        replace all "type" with "" in {_type}
+        send json "<yellow>Search - <gold>%{_type}%" tooltip "<yellow>Click me to search through the <gold>%{_type}% <yellow>type!" suggest "/search %{_type}% " to player
+      
+      send json "<gold>+ <yellow>- - - - <gold>+ <yellow>- - - - <gold>+ <yellow>- - - - <gold>+" tooltip "<light aqua>^^^ <dark aqua>Click one above to search! <light aqua>^^^" to player
+    else:
+      set {_type} to "%arg 1%"
+      replace all "types." and "type" with "" in {_type}
+      replace all "type" with "" in {_type}
+      add all enum values of arg 1 to {_loopable::*}
+      if arg 2 is set:
+        loop {_loopable::*}:
+          if "%loop-value%" contains "%arg 2%":
+            add "%loop-value%" to {_found::*}
+      else:
+        add all enum values of arg 1 to {_found::*}
+      if size of {_found::*} is not 0:
+      
+        set {_json} to "{""text"":"""",""extra"":[{""text"":""["",""color"":""gold""},{""text"":""Enums"",""color"":""yellow""},{""text"":""] "",""color"":""gold""},"
+                                      #         +++
+        if "%arg 2%" is "<none>":
+          set {_json} to "%{_json}%{""text"":""ALL of %{_type}%s (%size of {_found::*}%): "",""color"":""dark_aqua"",""bold"":""true""},"
+                               # #!{""text"":"""",""extra"":[{
+        else:
+          set {_json} to "%{_json}%{""text"":""%{_type}%s containing \""%arg 2%\"" (%size of {_found::*}%): "",""color"":""dark_aqua"",""bold"":""true""},"
+        
+        loop {_found::*}:
+          if "%arg 1%" contains "color":
+            add "<%loop-value%>%loop-value%" to {_formatted::*}
+          else:
+              
+            set {_currentcounter} to {_counter} / 2
+            set {_checkcounter} to rounded {_currentcounter}
+            if "%{_currentcounter}%" is "%{_checkcounter}%":
+              set {_color} to "gold"
+            else:
+              set {_color} to "yellow"
+            add "<%{_color}%>%loop-value%" to {_formatted::*}
+            
+            set {_counter} to {_counter} + 1
+            
+            if {_counter} is not 1:
+              if {_counter} is not size of {_found::*}:
+                set {_json} to "%{_json}%,{""text"":"", "",""color"":""yellow""},"
+              else:
+                set {_json} to "%{_json}%,{""text"":"" and "",""color"":""yellow""},"
+            
+            set {_json} to "%{_json}%{""text"":""%loop-value%"",""color"":""%{_color}%"",""clickEvent"":{""action"":""run_command"",""value"":""/testitout %player% %loop-value%""},""hoverEvent"":{""action"":""show_text"",""value"":""Click here to demonstrate %loop-value%!""}}"
+            
+            if {_counter} is size of {_found::*}:
+              set {_json} to "%{_json}%]}"
+              
+        set {_type} to "%{_type}%s"
+        
+        if "%arg 1%" contains "sound" or "particle":
+          if size of {_found::*} is less than 35:
+            #message "%{_json}%" to player
+            execute console command "tellraw %player% %{_json}%"
+            stop
+        if "%arg 2%" is "<none>":
+          if "%arg 1%" contains "sound" or "particle":
+            send json "{@pre}<dark aqua><bold>ALL of %{_type}%s (%size of {_formatted::*}%): <yellow>%{_formatted::*}%" tooltip "Sorry, too many to use JSON here! Keep it under 35 to click!" to player
+            send json "" tooltip "Sorry, too many to use JSON here! Keep it under 35 to click!" to player
+          else:
+            message "{@pre}<dark aqua><bold>ALL of %{_type}%s (%size of {_formatted::*}%): <yellow>%{_formatted::*}%" to player
+        else:
+          if "%arg 1%" contains "sound" or "particle":
+            send json "{@pre}<dark aqua><bold>%{_type}%s containing ""%arg 2%"" (%size of {_formatted::*}%): <yellow>%{_formatted::*}%" tooltip "Sorry, too many to use JSON here! Keep it under 35 to click!" to player
+          else:
+            message "{@pre}<dark aqua><bold>%{_type}%s containing ""%arg 2%"" (%size of {_formatted::*}%): <yellow>%{_formatted::*}%" to player
+          #else:
+          
+      else:
+        message "{@prebad}Sorry, I found no <gold>%{_type}%s <yellow>containing ""<gold>%arg 2%<yellow>""" to player
+      
+      
+command /testitout <player=%player%> [<sound>] [<particle>]:
+  permission:op
+  trigger:
+    if arg 2 is set:
+      play arg 2 at player argument with pitch 1
+    if arg 3 is set:
+      set {_loc} to location 4.5 in front of player argument 
+      spawn 500 of arg 3 data 1 offset with 1/2, 1/2, 1/2 at location 1.5 above {_loc}
+    
+    
+      
+      
+      
+      
+        
+    
+      
+
+
